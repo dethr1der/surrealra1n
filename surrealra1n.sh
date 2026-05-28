@@ -1,5 +1,5 @@
 #!/bin/bash
-CURRENT_VERSION="v1.4 beta 4"
+CURRENT_VERSION="v1.4 beta 5"
 
 clear
 
@@ -1503,36 +1503,21 @@ case "$1" in
         TARGET_IPSW="auto"
         BASE_IPSW="auto"
         FORCE_ACTIVATE="0"
-        for arg in "${@:3}"; do
-            case "$arg" in
-                --stitch-activation|--jailbreak) ;;
+        if [[ "${5:-}" == "--stitch-activation" || "${6:-}" == "--stitch-activation" ]]; then
+            case "$IOS_VERSION" in
+                7.*|8.*|9.0*|9.1*|9.2*)
+                    FORCE_ACTIVATE=1
+                    ;;
+                9.3*)
+                    FORCE_ACTIVATE=0
+                    ;;
                 *)
-                    echo "[!] Unknown --seprmvr64-ipsw argument: $arg"
-                    echo "[!] Usage: --seprmvr64-ipsw [iOS_VERSION] [--stitch-activation] [--jailbreak]"
+                    echo "[!] Unsupported iOS version for stitch-activation: $IOS_VERSION"
                     exit 1
                     ;;
             esac
-        done
-        for arg in "$@"; do
-            if [[ "$arg" == "--stitch-activation" ]]; then
-                case "$IOS_VERSION" in
-                    7.*|8.*|9.0*|9.1*|9.2*)
-                        FORCE_ACTIVATE=1
-                        ;;
-                    9.3*)
-                        FORCE_ACTIVATE=0
-                        ;;
-                    *)
-                        echo "[!] Unsupported iOS version for stitch-activation: $IOS_VERSION"
-                        exit 1
-                        ;;
-                esac
-            fi
-            if [[ "$arg" == "--jailbreak" ]]; then
-                JAILBREAK=1
-            fi
-        done
-        if ! seprmvr64_device_allowed "$IDENTIFIER"; then
+        fi
+        if [[ $IDENTIFIER == iPad5,1 || $IDENTIFIER == iPad5,2 || $IDENTIFIER == iPad5,4 || $IDENTIFIER == iPad4* ]]; then
             echo "Device is not supported yet for seprmvr64-ipsw"
             exit 1
         elif ! seprmvr64_ipsw_supported "$IDENTIFIER" "$IOS_VERSION"; then
